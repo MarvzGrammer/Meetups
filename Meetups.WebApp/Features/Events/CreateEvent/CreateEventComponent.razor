@@ -1,5 +1,6 @@
 ﻿@page "/events/create"
 
+@inject NavigationManager NavigationManager
 @inject CreatEventService CreatEventService
 
 @if (!string.IsNullOrWhiteSpace(errorMessage))
@@ -74,5 +75,7 @@
         //Save event
         await CreatEventService.CreateEventAsync(_eventViewModel);
 
+        //Redirect to event list
+        NavigationManager.NavigateTo("/");
     }
 }
