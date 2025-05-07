@@ -62,10 +62,17 @@
 
     private string? errorMessage = string.Empty;
 
-    private void CreateEvent()
+    private async Task CreateEvent()
     {
 
         errorMessage = CreatEventService.ValidateEvent(_eventViewModel);
+        if (!string.IsNullOrWhiteSpace(errorMessage))
+        {
+            return;
+        }
+
+        //Save event
+        await CreatEventService.CreateEventAsync(_eventViewModel);
 
     }
 }
