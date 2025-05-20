@@ -10,7 +10,8 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Title</th>
+
+                <th style ="text-align:center">Title</th>
                 <th>Begin Date Time</th>
                 <th>End Date Time</th>
                 <th>Capacity</th>
@@ -21,7 +22,20 @@
             @foreach (var createdEvent in _createdEvents)
             {
                 <tr>
-                    <td>@createdEvent.Title</td>
+                    <td style="text-align:center">
+                        @{
+                            var eventImage = createdEvent.ImageUrl; 
+                            if (string.IsNullOrWhiteSpace(eventImage))
+                            {
+                                eventImage = "/images/image-placeholder.png"; // Placeholder image URL
+                            }
+                          
+                            <img src="@eventImage" alt="Event Image" style="width: 100px; height: 59px;" />
+                        }
+                        <br />
+                        @createdEvent.Title
+                    </td>
+                    
                     <td>@createdEvent.BeginDate @createdEvent.BeginTime</td>
                     <td>@createdEvent.EndDate @createdEvent.EndTime</td>
                     <td>

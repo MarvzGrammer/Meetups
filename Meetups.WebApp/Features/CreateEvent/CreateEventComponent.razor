@@ -1,4 +1,5 @@
 ﻿@page "/events/create"
+@using SixLabors.ImageSharp.Processing
 
 @inject NavigationManager NavigationManager
 @inject CreatEventService CreatEventService
@@ -52,7 +53,20 @@
         <InputText id="Location" class="form-control" @bind-Value="_eventViewModel.Location" />
         <ValidationMessage For="@(() => _eventViewModel.Location)"></ValidationMessage>
     </div>
-    <br />  
+    <br />
+    <div class="form-group">
+        <label for="CoverImage">Cover Image</label>
+        <InputFile id="CoverImage" class="form-control" OnChange="HandleImageUpload" accept=".png"/>
+        <ValidationMessage For="@(() => _eventViewModel.CoverImage)"></ValidationMessage>
+    </div>
+    <br />
+    
+    @if (_eventViewModel.ImageUrl != null)
+    {
+        <img src="@_eventViewModel.ImageUrl" alt="Cover Image" class="img-thumbnail" />
+    }
+    <br/>
+    <br />
     <button type="submit" class="btn btn-primary">Create</button>
     &nbsp;
     <NavLink class="btn btn-secondary" href="/">Cancel</NavLink>
@@ -77,5 +91,43 @@
 
         //Redirect to event list
         NavigationManager.NavigateTo("/");
+    }
+
+    private async Task HandleImageUpload(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            _eventViewModel.CoverImage = e.File;
+
+            if (_eventViewModel.CoverImage == null)
+            {
+                errorMessage = "Please select a file.";
+                return;
+            }
+
+            // generate a unique file name
+            var fileName = Path.GetRandomFileName() + Path.GetExtension(_eventViewModel.CoverImage.Name);
+            var filePath = Path.Combine("wwwroot", "images", "events", fileName);
+
+            //Resize the image
+            using var stream = _eventViewModel.CoverImage.OpenReadStream();
+            using var image = await SixLabors.ImageSharp.Image.LoadAsync(stream);
+            image.Mutate(x => x.Resize(300, 169));
+
+            //Save the image
+            using var fileStream = new FileStream(filePath, FileMode.Create);
+            await image.SaveAsync(fileStream, new SixLabors.ImageSharp.Formats.Png.PngEncoder());
+
+            //Set the image url
+            _eventViewModel.ImageUrl = "/images/events/" + fileName;
+
+            errorMessage = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Error uploading image: " + ex.Message;
+        }
+        
+
     }
 }
